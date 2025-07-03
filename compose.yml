@@ -12,6 +12,8 @@ services:
   frontend:
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend:latest
     container_name: frontend
+    networks:
+      - minio
 
   # Hinweise:
   # - MinIO ist nach dem Start unter http://localhost:9001 (Konsole) erreichbar.
