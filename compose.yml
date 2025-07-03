@@ -1,9 +1,17 @@
 services:
+  nginx:
+    container_name: nginx
+    image: docker.io/nginx:alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx-config:/etc/nginx/conf.d
+    networks:
+      - minio
+
   frontend:
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend:latest
     container_name: frontend
-    ports:
-      - "80:3000"
 
   # Hinweise:
   # - MinIO ist nach dem Start unter http://localhost:9001 (Konsole) erreichbar.
@@ -13,9 +21,6 @@ services:
   minio:
     image: minio/minio:latest
     container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -47,8 +52,6 @@ services:
   forms-service:
     container_name: forms-service
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung:latest
-    ports:
-      - "3000:3000"
     environment:
       - NODE_ENV=production
     depends_on:
@@ -59,8 +62,6 @@ services:
   documentservice:
     container_name: documentservice
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung:latest
-    ports:
-      - "3001:3001"
     environment:
       - NODE_ENV=production
     depends_on:
