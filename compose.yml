@@ -10,7 +10,7 @@ services:
       - minio
 
   frontend:
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend:latest
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend
     container_name: frontend
     networks:
       - minio
@@ -18,17 +18,16 @@ services:
   # Hinweise:
   # - MinIO ist nach dem Start unter http://localhost:9001 (Konsole) erreichbar.
   # - Zugangsdaten: minioadmin / minioadmin
-  # - Die Daten werden im Ordner ./minio-data gespeichert.
   # - Init-Skripte und Startdaten können in ./minio-init abgelegt werden.
   minio:
     image: minio/minio:latest
     container_name: minio
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+    # environment:
+      # MINIO_ROOT_USER: minioadmin
+      # MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
     volumes:
-      - ./minio-data:/data
+      - minio_data:/data
     restart: unless-stopped
     networks:
       - minio
@@ -37,23 +36,25 @@ services:
     image: minio/mc:latest
     depends_on:
       - minio
-    volumes:
-      - ./minio-init/data/User1/Documents:/data/Documents
-      - ./minio-init/data/User1/Forms:/data/Forms
     entrypoint: >
       /bin/sh -c "
         sleep 5;
-        mc alias set myminio http://minio:9000 minioadmin minioadmin;
+        MINIO_ROOT_USER=$$(cat /run/secrets/minio_root_user);
+        MINIO_ROOT_PASSWORD=$$(cat /run/secrets/minio_root_password);
+        echo bruh
+
+        mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
         mc mb myminio/userdata;
-        mc cp /data/Documents/* myminio/userdata/User1/Documents/;
-        mc cp /data/Forms/* myminio/userdata/User1/Forms/;
       "
+    secrets:
+      - minio_root_user
+      - minio_root_password
     networks:
       - minio
 
   forms-service:
     container_name: forms-service
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung:latest
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung
     environment:
       - NODE_ENV=production
     depends_on:
@@ -63,7 +64,7 @@ services:
 
   documentservice:
     container_name: documentservice
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung:latest
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung
     environment:
       - NODE_ENV=production
     depends_on:
@@ -73,3 +74,11 @@ services:
   
 networks:
   minio:
+volumes:
+  minio_data:
+
+secrets:
+  minio_root_user:
+    external: true
+  minio_root_password:
+    external: true
