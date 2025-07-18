@@ -1,6 +1,6 @@
 server {
     listen ${EXTERNAL_PORT};
-    # server_name sp25.imn.htwk-leipzig.de;
+    client_max_body_size 50M;
 
     location / {
         proxy_pass http://frontend:3000/;
