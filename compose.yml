@@ -3,11 +3,20 @@ services:
     container_name: nginx
     image: docker.io/nginx:alpine
     ports:
-      - '80:80'
+      - $NGINX_PORT:$NGINX_PORT
+    environment:
+      - EXTERNAL_PORT=$NGINX_PORT # nginx muss den externen Port kennen, um absolute Redirect-
+                                  # Antworten an den Client mit dem richtigen Port erstellen zu können
     volumes:
-      - ./nginx-config:/etc/nginx/conf.d
+      - ./nginx-config:/etc/nginx/templates
+      - ./entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
     networks:
       - minio
+    depends_on:
+      - frontend
+      - document-service
+      - forms-service
 
   frontend:
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend
@@ -17,14 +26,15 @@ services:
 
   # Hinweise:
   # - MinIO ist nach dem Start unter http://localhost:9001 (Konsole) erreichbar.
-  # - Zugangsdaten: minioadmin / minioadmin
-  # - Init-Skripte und Startdaten können in ./minio-init abgelegt werden.
+  # - Zugangsdaten: siehe .env
   minio:
     image: minio/minio:latest
     container_name: minio
-    # environment:
-      # MINIO_ROOT_USER: minioadmin
-      # MINIO_ROOT_PASSWORD: minioadmin
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    # ports:
+    #   - 9001:9001
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -39,16 +49,12 @@ services:
     entrypoint: >
       /bin/sh -c "
         sleep 5;
-        MINIO_ROOT_USER=$$(cat /run/secrets/minio_root_user);
-        MINIO_ROOT_PASSWORD=$$(cat /run/secrets/minio_root_password);
-        echo bruh
+        MINIO_ROOT_USER=${MINIO_USER};
+        MINIO_ROOT_PASSWORD=${MINIO_PASSWORD};
 
-        mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+        mc alias set myminio http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
         mc mb myminio/userdata;
       "
-    secrets:
-      - minio_root_user
-      - minio_root_password
     networks:
       - minio
 
@@ -62,8 +68,8 @@ services:
     networks:
       - minio
 
-  documentservice:
-    container_name: documentservice
+  document-service:
+    container_name: document-service
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung
     environment:
       - NODE_ENV=production
@@ -76,9 +82,3 @@ networks:
   minio:
 volumes:
   minio_data:
-
-secrets:
-  minio_root_user:
-    external: true
-  minio_root_password:
-    external: true
