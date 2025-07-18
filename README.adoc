@@ -1,0 +1,153 @@
+= Installation der Anwendung
+:toc-title: Inhaltsverzeichnis
+:toc:
+:toclevels: 3
+
+== Demoserver
+Die Anwendung ist abrufbar auf unserem https://sp25.imn.htwk-leipzig.de[HTWK-Server]. Dort ist stets die neueste Version (der main-Branches) aller Komponenten deployed.
+Das Deployment erfolgte dort mit Podman und der unveränderten Compose aus diesem Repo.
+
+== Installation
+Wie auf dem Server wird die Anwendung ausschließlich mit einer Containerlaufzeit wie Podman oder Docker, und der gegebenen Compose ausgeführt.
+Dabei wird angenommen, dass Docker Compose V2 oder ein kompatibles Werkzeug verwendet wird.
+
+=== Rahmenbedingungen
+
+- Es wird angenommen, dass Podman oder Docker sowie Docker Compose V2 bereits installiert sind. Dies ist auf verschiedenen Plattformen unterschiedlich und ist hier out of scope.
+
+=== Projektverzeichnis einrichten
+**Ordner anlegen**
+
+[source,bash]
+----
+mkdir kiel && cd kiel
+---- 
+
+**Dateien anlegen**
+
+[source,bash]
+----
+touch compose.yml .env
+----
+
+**Inhalt der compose.yml**
+[source,text]
+----
+services:
+  nginx:
+    container_name: nginx
+    image: docker.io/nginx:alpine
+    ports:
+      - $NGINX_PORT:$NGINX_PORT
+    environment:
+      - EXTERNAL_PORT=$NGINX_PORT # nginx muss den externen Port kennen, um absolute Redirect-
+                                  # Antworten an den Client mit dem richtigen Port erstellen zu können
+    volumes:
+      - ./nginx-config:/etc/nginx/templates
+      - ./entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
+    networks:
+      - minio
+    depends_on:
+      - frontend
+      - document-service
+      - forms-service
+
+  frontend:
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend
+    container_name: frontend
+    networks:
+      - minio
+
+  # - Zugangsdaten: siehe .env
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    networks:
+      - minio
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5;
+        MINIO_ROOT_USER=${MINIO_USER};
+        MINIO_ROOT_PASSWORD=${MINIO_PASSWORD};
+
+        mc alias set myminio http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+        mc mb myminio/userdata;
+      "
+    networks:
+      - minio
+
+  forms-service:
+    container_name: forms-service
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - minio
+    networks:
+      - minio
+
+  document-service:
+    container_name: document-service
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - minio
+    networks:
+      - minio
+  
+networks:
+  minio:
+volumes:
+  minio_data:
+----
+
+**Inhalt der .env**
+[source,text]
+----
+MINIO_USER=minioadmin
+MINIO_PASSWORD=minioadmin
+NGINX_PORT=80 # oder >=1024, falls rootless Containerlaufzeit genutzt wird
+----
+
+=== Anwendung starten
+**Authentifizierung bei der Gitlab-Container-Registry**
+
+- Da die Repositories eine private Sichtbarkeit haben, und das DIT Gitlab grundsätzlich einen Token braucht, wird hier ein Deployment Token zur Verfügung gestellt.
+
+[source,bash]
+----
+echo "REDACTED_GITLAB_TOKEN" | podman login gitlab.dit.htwk-leipzig.de:5050 -u "kiel-deploy-token" --password-stdin
+----
+oder (Docker)
+[source,bash]
+----
+echo "REDACTED_GITLAB_TOKEN" | docker login gitlab.dit.htwk-leipzig.de:5050 -u "kiel-deploy-token" --password-stdin
+----
+
+**Container installieren und starten**
+
+- noch immer im Ordner "kiel" aus dem vorherigen Schritt
+[source,bash]
+----
+podman compose up -d
+// oder
+docker compose up -d
+----
+[source,bash]
+
+=== Frontend im Browser öffnen
+http://localhost:80 aufrufen (bzw. anderer Port, wenn in `.env` verändert)
