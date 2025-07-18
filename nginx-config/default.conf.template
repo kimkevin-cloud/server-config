@@ -1,13 +1,13 @@
 server {
-    listen 80;
-    server_name sp25.imn.htwk-leipzig.de;
+    listen ${EXTERNAL_PORT};
+    # server_name sp25.imn.htwk-leipzig.de;
 
     location / {
         proxy_pass http://frontend:3000/;
     }
 
     location /documents/ {
-        proxy_pass http://documentservice:3001/;
+        proxy_pass http://document-service:3001/;
 
         proxy_set_header X-Forwarded-Prefix /documents;
         proxy_set_header X-Forwarded-Proto $scheme;
