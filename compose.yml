@@ -1,27 +1,43 @@
 services:
-  frontend:
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend:latest
-    container_name: frontend
+  nginx:
+    container_name: nginx
+    image: docker.io/nginx:alpine
     ports:
-      - "80:3000"
+      - $NGINX_PORT:$NGINX_PORT
+    environment:
+      - EXTERNAL_PORT=$NGINX_PORT # nginx muss den externen Port kennen, um absolute Redirect-
+                                  # Antworten an den Client mit dem richtigen Port erstellen zu können
+    volumes:
+      - ./nginx-config:/etc/nginx/templates
+      - ./entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
+    networks:
+      - minio
+    depends_on:
+      - frontend
+      - document-service
+      - forms-service
+
+  frontend:
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend
+    container_name: frontend
+    networks:
+      - minio
 
   # Hinweise:
   # - MinIO ist nach dem Start unter http://localhost:9001 (Konsole) erreichbar.
-  # - Zugangsdaten: minioadmin / minioadmin
-  # - Die Daten werden im Ordner ./minio-data gespeichert.
-  # - Init-Skripte und Startdaten können in ./minio-init abgelegt werden.
+  # - Zugangsdaten: siehe .env
   minio:
     image: minio/minio:latest
     container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    # ports:
+    #   - 9001:9001
     command: server /data --console-address ":9001"
     volumes:
-      - ./minio-data:/data
+      - minio_data:/data
     restart: unless-stopped
     networks:
       - minio
@@ -30,25 +46,21 @@ services:
     image: minio/mc:latest
     depends_on:
       - minio
-    volumes:
-      - ./minio-init/data/User1/Documents:/data/Documents
-      - ./minio-init/data/User1/Forms:/data/Forms
     entrypoint: >
       /bin/sh -c "
         sleep 5;
-        mc alias set myminio http://minio:9000 minioadmin minioadmin;
+        MINIO_ROOT_USER=${MINIO_USER};
+        MINIO_ROOT_PASSWORD=${MINIO_PASSWORD};
+
+        mc alias set myminio http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
         mc mb myminio/userdata;
-        mc cp /data/Documents/* myminio/userdata/User1/Documents/;
-        mc cp /data/Forms/* myminio/userdata/User1/Forms/;
       "
     networks:
       - minio
 
   forms-service:
     container_name: forms-service
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung:latest
-    ports:
-      - "3000:3000"
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/antragstellung
     environment:
       - NODE_ENV=production
     depends_on:
@@ -56,11 +68,9 @@ services:
     networks:
       - minio
 
-  documentservice:
-    container_name: documentservice
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung:latest
-    ports:
-      - "3001:3001"
+  document-service:
+    container_name: document-service
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/dokumentenverwaltung
     environment:
       - NODE_ENV=production
     depends_on:
@@ -70,3 +80,5 @@ services:
   
 networks:
   minio:
+volumes:
+  minio_data:
