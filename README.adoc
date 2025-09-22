@@ -5,7 +5,7 @@
 
 == Demoserver
 Die Anwendung ist abrufbar auf unserem https://sp25.imn.htwk-leipzig.de[HTWK-Server]. Dort ist stets die neueste Version (der main-Branches) aller Komponenten deployed.
-Das Deployment erfolgte dort mit Podman und der unveränderten Compose aus diesem Repo.
+Das Deployment erfolgte dort mit Podman und den unveränderten Konfigurationsdateien aus diesem Repo.
 
 == Installation
 Wie auf dem Server wird die Anwendung ausschließlich mit einer Containerlaufzeit wie Podman oder Docker, und der gegebenen Compose ausgeführt.
@@ -13,24 +13,28 @@ Dabei wird angenommen, dass Docker Compose V2 oder ein kompatibles Werkzeug verw
 
 === Rahmenbedingungen
 
-- Es wird angenommen, dass Podman oder Docker sowie Docker Compose V2 bereits installiert sind. Dies ist auf verschiedenen Plattformen unterschiedlich und ist hier out of scope.
+- Es wird angenommen, dass Podman oder Docker sowie Docker Compose V2 bereits installiert sind. Dies ist auf verschiedenen Plattformen unterschiedlich und ist hier Out of Scope.
 
 === Projektverzeichnis einrichten
+* ℹ️ Die folgende Ordnerstruktur und Dateien sind in diesem Repo bereits vorhanden. Falls dieses Repo also lokal geklont wurde, können die Schritte übersprungen werden und es kann mit <<start-app,Anwendung starten>> fortgefahren werden.
+  ** lokal klonen: `+git clone git@gitlab.dit.htwk-leipzig.de:projekt2025-k-proaktive-services-mit-mein.kiel/server-config.git && cd server-config+`
+  ** `./.env` muss verändert werden, falls ein anderer Port als `80` verwendet werden soll
+
 **Ordner anlegen**
 
 [source,bash]
 ----
-mkdir kiel && cd kiel
+mkdir kiel && cd kiel && mkdir nginx-config
 ---- 
 
 **Dateien anlegen**
 
 [source,bash]
 ----
-touch compose.yml .env
+touch compose.yml .env nginx-config/default.conf.template
 ----
 
-**Inhalt der compose.yml**
+**Inhalt von `./compose.yml`**
 [source,text]
 ----
 services:
@@ -44,8 +48,11 @@ services:
                                   # Antworten an den Client mit dem richtigen Port erstellen zu können
     volumes:
       - ./nginx-config:/etc/nginx/templates
-      - ./entrypoint.sh:/entrypoint.sh
-    entrypoint: /entrypoint.sh
+    entrypoint: >
+      /bin/sh -c "
+        envsubst '$${EXTERNAL_PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf;
+        exec nginx -g 'daemon off;'
+      "
     networks:
       - minio
     depends_on:
@@ -115,7 +122,7 @@ volumes:
   minio_data:
 ----
 
-**Inhalt der .env**
+**Inhalt von `./.env`**
 [source,text]
 ----
 MINIO_USER=minioadmin
@@ -123,16 +130,47 @@ MINIO_PASSWORD=minioadmin
 NGINX_PORT=80 # oder >=1024, falls rootless Containerlaufzeit genutzt wird
 ----
 
+**Inhalt von `./nginx-config/default.conf.template`**
+[source,text]
+----
+server {
+    listen ${EXTERNAL_PORT};
+    client_max_body_size 50M;
+
+    location / {
+        proxy_pass http://frontend:3000/;
+    }
+
+    location /documents/ {
+        proxy_pass http://document-service:3001/;
+
+        proxy_set_header X-Forwarded-Prefix /documents;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect / /documents/;
+    }
+
+    location /forms/ {
+        proxy_pass http://forms-service:3000/;
+
+        proxy_set_header X-Forwarded-Prefix /forms;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect / /forms/;
+    }
+}
+----
+
+[[start-app]]
 === Anwendung starten
 **Authentifizierung bei der Gitlab-Container-Registry**
 
 - Da die Repositories eine private Sichtbarkeit haben, und das DIT Gitlab grundsätzlich einen Token braucht, wird hier ein Deployment Token zur Verfügung gestellt.
 
+Podman:
 [source,bash]
 ----
 echo "REDACTED_GITLAB_TOKEN" | podman login gitlab.dit.htwk-leipzig.de:5050 -u "kiel-deploy-token" --password-stdin
 ----
-oder (Docker)
+Docker:
 [source,bash]
 ----
 echo "REDACTED_GITLAB_TOKEN" | docker login gitlab.dit.htwk-leipzig.de:5050 -u "kiel-deploy-token" --password-stdin
