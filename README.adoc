@@ -18,6 +18,7 @@ Dabei wird angenommen, dass Docker Compose V2 oder ein kompatibles Werkzeug verw
 === Projektverzeichnis einrichten
 * ℹ️ Die folgende Ordnerstruktur und Dateien sind in diesem Repo bereits vorhanden. Falls dieses Repo also lokal geklont wurde, können die Schritte übersprungen werden und es kann mit <<start-app,Anwendung starten>> fortgefahren werden.
   ** lokal klonen: `+git clone git@gitlab.dit.htwk-leipzig.de:projekt2025-k-proaktive-services-mit-mein.kiel/server-config.git && cd server-config+`
+  ** `./.env` muss verändert werden, falls ein anderer Port als `80` verwendet werden soll
 
 **Ordner anlegen**
 
