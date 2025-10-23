@@ -1,0 +1,25 @@
+@prefix : <https://solid.valetudo.casa/my-app/meinKiel/profile#> .
+@prefix schema: <http://schema.org/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Example for Demo
+:me
+  a schema:Person ;
+  schema:name "Petra Plietsch" ;
+  schema:birthDate "1990-05-15"^^xsd:date ;
+
+  # not expected to exist in practise (just for Demo)
+  :movedInDate "2025-09-01"^^xsd:date ;
+  :registrationNumber "UNI-202300123" ;
+  :landlord "Studentenwerk SH";
+  :landlordpod <https://landlord.pod.example/people/landlord#me> ;
+  :bankAccountNumber "DE89 3704 0044 0532 0130 00" ;
+  :bundID "BUND-ID-1234567890" .
+
+:myAddress
+  a vcard:Address ;
+  vcard:street-address "Fleethörn 42" ;
+  vcard:postal-code "24103" ;
+  vcard:locality "Kiel" ;
+  vcard:country-name "Germany" .

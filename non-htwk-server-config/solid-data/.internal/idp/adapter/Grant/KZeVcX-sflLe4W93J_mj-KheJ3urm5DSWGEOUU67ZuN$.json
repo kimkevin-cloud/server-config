@@ -1,0 +1,1 @@
+{"key":"idp/adapter/Grant/KZeVcX-sflLe4W93J_mj-KheJ3urm5DSWGEOUU67ZuN","payload":{"expires":"2025-11-06T21:32:42.911Z","payload":{"iat":1761255162,"exp":1762464762,"accountId":"https://solid.valetudo.casa/my-app/profile/card#me","clientId":"S0LaGC9Lz2lhvQgB9isPj","kind":"Grant","jti":"KZeVcX-sflLe4W93J_mj-KheJ3urm5DSWGEOUU67ZuN","openid":{"scope":"openid offline_access webid"}}}}
