@@ -6,7 +6,7 @@ services:
       - $NGINX_PORT:$NGINX_PORT
     environment:
       - EXTERNAL_PORT=$NGINX_PORT # nginx muss den externen Port kennen, um absolute Redirect-
-                                  # Antworten an den Client mit dem richtigen Port erstellen zu können
+        # Antworten an den Client mit dem richtigen Port erstellen zu können
     volumes:
       - ./nginx-config:/etc/nginx/templates
     entrypoint: >
@@ -15,17 +15,17 @@ services:
         exec nginx -g 'daemon off;'
       "
     networks:
-      - minio
+      - nginx
     depends_on:
       - frontend
       - document-service
       - forms-service
 
   frontend:
-    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend
+    image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend-v2
     container_name: frontend
     networks:
-      - minio
+      - nginx
 
   # - Zugangsdaten: siehe .env
   minio:
@@ -39,7 +39,7 @@ services:
       - minio_data:/data
     restart: unless-stopped
     networks:
-      - minio
+      - nginx
 
   minio-init:
     image: minio/mc:latest
@@ -55,7 +55,7 @@ services:
         mc mb myminio/userdata;
       "
     networks:
-      - minio
+      - nginx
 
   forms-service:
     container_name: forms-service
@@ -65,7 +65,7 @@ services:
     depends_on:
       - minio
     networks:
-      - minio
+      - nginx
 
   document-service:
     container_name: document-service
@@ -75,9 +75,23 @@ services:
     depends_on:
       - minio
     networks:
-      - minio
-  
+      - nginx
+
+  solid:
+    platform: linux/amd64 # Fehler auf arm64 verhindern (CSS hat nur amd64 images)
+    container_name: solid
+    image: solidproject/community-server:latest
+    volumes:
+      # Persistente Daten für die Pods
+      - ./solid-data:/data
+    command: >
+      -c config/file.json
+      -f /data
+      -l info
+    networks:
+      - nginx
+
 networks:
-  minio:
+  nginx:
 volumes:
   minio_data:
