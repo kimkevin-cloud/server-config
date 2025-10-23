@@ -26,7 +26,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_SOLID_URL=https://solid.valetudo.casa
-      - PUBLIC_SERVER_DOCUMENTS_URL=https://sp25.imn.htwk-leipzig.de/documents
+      - PUBLIC_SERVER_DOCUMENTS_URL=http://document-service:3001
       - PUBLIC_DOCUMENTS_URL=https://sp25.imn.htwk-leipzig.de/documents
     networks:
       - nginx
