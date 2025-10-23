@@ -24,6 +24,10 @@ services:
   frontend:
     image: gitlab.dit.htwk-leipzig.de:5050/projekt2025-k-proaktive-services-mit-mein.kiel/frontend-v2
     container_name: frontend
+    environment:
+      - PUBLIC_SOLID_URL=https://sp25.imn.htwk-leipzig.de/solid
+      - PUBLIC_SERVER_DOCUMENTS_URL=https://sp25.imn.htwk-leipzig.de/documents
+      - PUBLIC_DOCUMENTS_URL=https://sp25.imn.htwk-leipzig.de/documents
     networks:
       - nginx
 
@@ -81,6 +85,8 @@ services:
     platform: linux/amd64 # Fehler auf arm64 verhindern (CSS hat nur amd64 images)
     container_name: solid
     image: solidproject/community-server:latest
+    environment:
+      - CSS_BASE_URL=http://localhost/solid/
     volumes:
       # Persistente Daten für die Pods
       - ./solid-data:/data
