@@ -1,0 +1,12 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+@prefix solid: <http://www.w3.org/ns/solid/terms#>.
+
+<>
+    a foaf:PersonalProfileDocument;
+    foaf:maker <https://solid.valetudo.casa/my-app/profile/card#me>;
+    foaf:primaryTopic <https://solid.valetudo.casa/my-app/profile/card#me>.
+
+<https://solid.valetudo.casa/my-app/profile/card#me>
+    
+    solid:oidcIssuer <https://solid.valetudo.casa/>;
+    a foaf:Person.

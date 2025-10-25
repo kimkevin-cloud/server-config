@@ -1,0 +1,22 @@
+### Dies ist die Konfiguration wie sie auf einem privaten VPS deployed ist.
+### Wie dort die reverse proxy konfiguriert ist, ist out of scope. Dies soll nur eine temporäre Lösung sein
+services:  
+  solid:
+    container_name: solid
+    image: localhost/armsolid:latest  # der Server ist ARM. Image lokal gebaut von Quellcode tag v7.1.7 da keine arm64 Images
+                                      # öffentlich sind. https://github.com/CommunitySolidServer/CommunitySolidServer
+    environment:
+      - CSS_BASE_URL=https://solid.valetudo.casa
+    volumes:
+      # Persistente Daten für die Pods
+      - ./solid-data:/data
+    command: >
+      -c config/file.json
+      -f /data
+      -l info
+    networks:
+      - nginx
+
+networks:
+  the_reverse_proxy_network:
+    external: true
