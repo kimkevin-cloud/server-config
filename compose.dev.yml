@@ -1,0 +1,119 @@
+services:
+  nginx:
+    container_name: nginx
+    image: docker.io/nginx:alpine
+    ports:
+      - 4173:4173
+    environment:
+      - EXTERNAL_PORT=4173 # nginx muss den externen Port kennen, um absolute Redirect-
+        # Antworten an den Client mit dem richtigen Port erstellen zu können
+    volumes:
+      - ./nginx-config:/etc/nginx/templates
+    entrypoint: >
+      /bin/sh -c "
+        envsubst '$${EXTERNAL_PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf;
+        exec nginx -g 'daemon off;'
+      "
+    networks:
+      - nginx
+    depends_on:
+      - frontend
+      - document-service
+      - forms-service
+
+  frontend:
+    build:
+      context: ../frontend-v2
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      - PUBLIC_SOLID_URL=https://solid.valetudo.casa
+      - PUBLIC_SERVER_DOCUMENTS_URL=http://document-service:3001
+      - PUBLIC_DOCUMENTS_URL=http://localhost:3001
+    networks:
+      - nginx
+
+  # - Zugangsdaten: siehe .env
+  # Deprecated
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    networks:
+      - nginx
+
+  # Deprecated
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5;
+        MINIO_ROOT_USER=${MINIO_USER};
+        MINIO_ROOT_PASSWORD=${MINIO_PASSWORD};
+
+        mc alias set myminio http://minio:9000 ${MINIO_USER} ${MINIO_PASSWORD};
+        mc mb myminio/userdata;
+      "
+    networks:
+      - nginx
+
+  # Deprecated
+  forms-service:
+    container_name: forms-service
+    build:
+      context: ../antragstellung/formService
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - minio
+    networks:
+      - nginx
+
+  # Deprecated
+  document-service:
+    container_name: document-service
+    build:
+      context: ../dokumentenverwaltung/documentService
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - minio
+    networks:
+      - nginx
+
+  ### wird extern gehosted (https://solid.valetudo.casa) bis wird auf der HTWK proxy eine Subdomain
+  ### (z.B. https://solid.sp25.imn.htwk-leipzig.de) eingerichtet werden kann. Subpath routing (domain.de/solid) ist zu hacky
+  # solid:
+  #   # platform: linux/amd64 # Fehler auf arm64 verhindern (CSS hat nur amd64 images)
+  #   container_name: solid
+  #   image: solidproject/community-server:latest
+  #   environment:
+  #     - CSS_BASE_URL=http://localhost/solid/
+  #   volumes:
+  #     # Persistente Daten für die Pods
+  #     - ./solid-data:/data
+  #   command: >
+  #     -c config/file.json
+  #     -f /data
+  #     -l info
+  #   networks:
+  #     - nginx
+
+networks:
+  nginx:
+volumes:
+  minio_data:
