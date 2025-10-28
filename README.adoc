@@ -189,3 +189,10 @@ docker compose up -d
 
 === Frontend im Browser öffnen
 http://localhost:80 aufrufen (bzw. anderer Port, wenn in `.env` verändert)
+
+
+=== Anmeldung mit Comunity Solid Server Account
+
+Zur Anmeldung mit dem eigenen Pod muss der Nutzer auf „Anmelden“ klicken. Anschließend wird er zur CSS-Anmeldeseite weitergeleitet, wo er die Möglichkeit hat, einen neuen Pod zu erstellen oder sich mit einem bereits existierenden Pod anzumelden. Im untenstehenden Sequenzdiagramm wird der Ablauf genauer beschrieben.
+
+image:Anmeldung mit Solid Pod Seq.png[]
