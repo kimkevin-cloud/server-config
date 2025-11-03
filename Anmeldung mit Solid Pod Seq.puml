@@ -1,0 +1,49 @@
+@startuml
+
+Actor User
+participant "Mein.Kiel" as Kiel
+participant "Comunity Solid Server" as CSS
+
+==Anmeldung mit existierendem Pod==
+
+User -> Kiel : Klickt auf "Anmelden"
+activate User
+activate Kiel
+Kiel -> CSS : Weiterleitung Authorizierungsseite
+activate CSS
+CSS --> User : Zeigt eigene Daten \n zur Prüfung
+User -> CSS : Klickt auf "Authorize"
+CSS --> Kiel : Leitet User zurück zu Mein.Kiel
+deactivate CSS
+Kiel -> User : Zeigt Startseite
+deactivate Kiel
+deactivate User
+
+==Konto erstellen und Anmeldung==
+
+User -> Kiel : Klicht auf "Anmelden"
+activate User
+activate Kiel
+Kiel -> CSS : Weiterleitung
+deactivate Kiel
+activate CSS
+User -> CSS : Klickt auf "Sign up"
+CSS -> CSS : Wechselt auf "Create Account" Seite
+User -> CSS : Gibt einen Email und Passwort ein
+User -> CSS : Klickt aus "Create Pod"
+CSS -> CSS : Wechselt auf "Create Pod" Seite
+User -> CSS : Gibt den Pod einen Namen
+User -> CSS : WebID origin auswählen
+User -> CSS : Klickt auf "Continue authentication"
+User -> CSS : Prüft Daten und authoriziert Konto Erstellung
+CSS --> Kiel : Leitet User zurück zu Mein.Kiel
+deactivate CSS
+activate Kiel
+Kiel -> User : Zeigt Startseite
+deactivate Kiel
+deactivate User
+
+
+
+
+@enduml
