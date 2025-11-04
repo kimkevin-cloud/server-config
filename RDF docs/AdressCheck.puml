@@ -1,0 +1,20 @@
+@startuml
+
+    /' Dokumentation des Suchvorgangs nach einer Adresse im Vermieter-Pod, 
+    auf die im Studenten-Pod verwiesen wird '/
+
+    actor Student
+    participant "Mein.Kiel" as Kiel
+    participant StudentPod
+    participant VermieterPod
+
+    Student -> Kiel : Möchte Wohnsitzanmeldung machen
+    Kiel -> StudentPod : Sucht Verweis auf Adresse
+    StudentPod --> Kiel : Adressenverweis
+    Kiel -> VermieterPod : Nutzt Adressenverweis auf Vermieter Merkmal \n , um Adresse zu lesen
+    VermieterPod --> Kiel : Adresse
+    Kiel -> Kiel : Nutzt Adresse für Wohnsitzanmeldung
+    Student -> Kiel : Schließt Vorgang ab
+    Kiel --> Student : Erfolgsmeldung
+
+@enduml
