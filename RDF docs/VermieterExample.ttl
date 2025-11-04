@@ -1,0 +1,26 @@
+# OWL Dokumentation : https://www.w3.org/TR/owl-ref/
+
+@prefix : <http://localhost:3000/lord/adresses/musterstrasse1#>.
+@prefix schema: <http://schema.org/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Vermieter-Information: Studentenwerk Schleswig-Holstein
+:lord
+  a schema:Person;
+    schema:name "Studentenwerk SH"^^xsd:string.  # Organisation als Vermieter
+
+# Mieter-Information: Verweist auf dieselbe Person wie in der Studierenden-Datei
+:tenant
+  a schema:Person;
+    schema:name "Petra Plietsch"^^xsd:string.  # Mieterin des Objekts
+
+# Adressdaten des Mietobjekts
+:address
+  a schema:PostalAddress;
+    schema:streetAddress "Musterstraße 1"^^xsd:string;  # Straße und Hausnummer
+    schema:addressLocality "Kiel"^^xsd:string;          # Stadt
+    schema:postalCode "24103"^^xsd:string;              # Postleitzahl
+    schema:addressCountry "DE"^^xsd:string;             # Ländercode
+    schema:identifier "MG-2025-0456"^^xsd:string;       # Eindeutige Adress-ID
+    owl:sameAs <http://localhost:3000/stud/mein-kiel/profile#address>.  # Verknüpfung zur Studierenden-Adresse

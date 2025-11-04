@@ -1,0 +1,45 @@
+# OWL Dokumentation : https://www.w3.org/TR/owl-ref/
+
+@prefix : <http://localhost:3000/stud/meinKiel/profile#>.
+@prefix schema: <http://schema.org/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix fibo-fbc-pas-caa: <https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix aiiso: <https://vocab.org/aiiso/#organization>.
+@prefix org: <https://www.w3.org/ns/org>.
+
+# Personendefinition:  mit Verknüpfung zur Studentendefinition und Universität
+:me
+  a schema:Person;
+    schema:name "Petra Plietsch"^^xsd:string;
+    schema:address :address;  # Referenz auf die Adresse
+    owl:sameAs :stud.         # Verknüpfung zur Studierenden-Ressource
+
+# Studentenressource: Person + Matrikelnummer (identifier) + Universitätszugehörigkeit (memberOf:uni)
+:stud
+  a schema:Person;
+    schema:identifier "9660876"^^xsd:string;  # Studenten-ID
+    org:memberOf :uni;                        # Zugehörigkeit zur Uni Kiel
+    owl:sameAs :me.                           # Verknüpfung zur Person
+
+# Adressdaten: vollständige Anschrift (basierend auf Vermieters Angabe) und eindeutiger ID (schema:identifier)
+:address
+  a schema:PostalAddress;
+    schema:streetAddress "Musterstraße 1"^^xsd:string;
+    schema:addressLocality "Kiel"^^xsd:string;
+    schema:postalCode "24103"^^xsd:string;
+    schema:addressCountry "DE"^^xsd:string;
+    schema:identifier "MG-2025-0456"^^xsd:string;  # Interne Adress-ID
+    owl:sameAs <http://localhost:3000/lord/tenants/room3>.  # Link zur Mieterressource
+
+# Bankkonto-Informationen: Kontoinhaber, Bank und IBAN
+:bankAccount
+  a fibo-fbc-pas-caa:Account;
+    fibo-fbc-pas-caa:AccountHolder :me;                      # Kontoinhaber: Petra
+    fibo-fbc-pas-caa:AccountProvider "Förde Sparkasse"^^xsd:string;  # Bankname
+    fibo-fbc-pas-caa:AccountIdentifier "DE12345678900000000000"^^xsd:string.  # IBAN
+
+# Universitätsobjekt: repräsentiert die Hochschule
+:uni
+  a aiiso:Organization;
+    schema:name "Christian-Albrecht-Universität zu Kiel"^^xsd:string.
