@@ -1,6 +1,6 @@
 @prefix : <http://localhost:3000/kielcloak/antraege/stud-2025-11-26#>.
 @prefix schema: <http://schema.org/>.
-@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix dct: <http://purl.org/dc/terms/>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix aiiso: <https://vocab.org/aiiso#>.
@@ -14,7 +14,8 @@
     schema:familyName "Plietsch"^^xsd:string;       # Nachname
     schema:birthDate "1990-01-01"^^xsd:date;        # Geburtsdatum
     schema:birthPlace :birthPlace;
-    schema:PostalAddress :address .
+    schema:PostalAddress :address;
+    fibo-fbc-pas-caa:Account :bankAccount.
 
 # Geburtsort
 :birthplace
@@ -41,8 +42,16 @@
     schema:name "Christian-Albrechts-Universität zu Kiel"^^xsd:string;
     schema:startDate "2025-10-01"^^xsd:date.      # Datum seit Beginn Studium/Lehre
 
+# Bankkonto (Zahlungsoption)
+:bankAccount
+  a fibo-fbc-pas-caa:Account;
+    fibo-fbc-pas-caa:AccountHolder :person1;
+    fibo-fbc-pas-caa:AccountProvider "Förde Sparkasse"^^xsd:string;
+    fibo-fbc-pas-caa:AccountIdentifier "DE12345678900000000000"^^xsd:string.
+
 # Antrag / Application - spezifisch für das Begrüßungsgeld
 :application1
     schema:Person :person1;
     aiiso:Organization :org;
-    dcterms:created "2025-11-26"^^xsd:date.       # Datum des Auftrags / Antragsdatum
+    fibo-fbc-pas-caa:Account: :bankAccount;
+    dct:created "2025-11-26"^^xsd:date.       # Datum des Auftrags / Antragsdatum
