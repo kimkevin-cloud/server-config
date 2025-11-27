@@ -4,7 +4,7 @@
 <#Plietsch>
     a acl:Authorization;
     acl:accessTo <./musterstrasse1.ttl>;
-    acl:agent <http://localhost:3000/stud/profile/card#me>;
+    acl:agent <http://localhost:3000/stud/profile/card#me>; # Solid-Pod des Nutzers, der den Antrag gestellt hat
     acl:mode acl:Read.
 
 <#owner>
@@ -12,7 +12,7 @@
     acl:agent <http://localhost:3000/lord/profile/card#me>;
     # Optional owner email, to be used for account recovery:
     
-    # Set the access to the root storage folder itself
+    # Zugriffsrechte für den Owner (das Backend) setzen -> muss auf die spezifische Datei zeigen
     acl:accessTo <./musterstrasse1.ttl>;
     # All resources will inherit this authorization, by default
     acl:default <./>;

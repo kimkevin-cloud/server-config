@@ -196,3 +196,20 @@ http://localhost:80 aufrufen (bzw. anderer Port, wenn in `.env` verändert)
 Zur Anmeldung mit dem eigenen Pod muss der Nutzer auf „Anmelden“ klicken. Anschließend wird er zur CSS-Anmeldeseite weitergeleitet, wo er die Möglichkeit hat, einen neuen Pod zu erstellen oder sich mit einem bereits existierenden Pod anzumelden. Im untenstehenden Sequenzdiagramm wird der Ablauf genauer beschrieben.
 
 image:Anmeldung mit Solid Pod Seq.png[]
+
+=== Dokumentation zu den Verwendeten Ontologien
+
+* schema: http://schema.org/
+  * Allgemeine Personen- und Organisationsdaten
+* owl: http://www.w3.org/2002/07/owl#
+  * Verknüpfung zu anderen Ressourcen (Things)
+* fibo-fbc-pas-caa: https://spec.edmcouncil.org/fibo/ontology/FBC/ProductsAndServices/ClientsAndAccounts/
+  * Bankkontodaten
+* xsd: http://www.w3.org/2001/XMLSchema#
+  * Typzuweisung für Literale
+* aiiso: https://vocab.org/aiiso#
+  * Akademische Organisationen
+* org: https://www.w3.org/ns/org#
+  * Für Zuordnen von Student zu Uni
+* dct: http://purl.org/dc/terms/
+  * Für extra Metadaten (für Erstellungsdatum)
