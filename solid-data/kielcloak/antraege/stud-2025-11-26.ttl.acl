@@ -3,17 +3,17 @@
 
 <#Plietsch>
     a acl:Authorization;
-    acl:accessTo <./musterstrasse1.ttl>;
+    acl:accessTo <./stud-2025-11-26.ttl>;
     acl:agent <http://localhost:3000/stud/profile/card#me>;
     acl:mode acl:Read.
 
 <#owner>
     a acl:Authorization;
-    acl:agent <http://localhost:3000/lord/profile/card#me>;
+    acl:agent <http://localhost:3000/kielcloak/profile/card#me>;
     # Optional owner email, to be used for account recovery:
     
     # Set the access to the root storage folder itself
-    acl:accessTo <./musterstrasse1.ttl>;
+    acl:accessTo <./stud-2025-11-26.ttl>;
     # All resources will inherit this authorization, by default
     acl:default <./>;
     # The owner has all of the access modes allowed

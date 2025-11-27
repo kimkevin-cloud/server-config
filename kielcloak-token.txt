@@ -1,0 +1,4 @@
+# Nicht die echten Tokens aus der deployten Anwendung
+Token identifier: _63a16ef9-c597-4cc8-9e69-1e24394c65be
+
+Token secret: c94584838b6f2357dddb81958abbbd4329d03df5cfbcfb30a15622972113fb418eebefd13f38b1a853db31b46c45686864e8b30bc5431ffd54fce516f1e0997d
