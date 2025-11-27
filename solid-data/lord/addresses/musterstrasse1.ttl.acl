@@ -13,7 +13,7 @@
     # Optional owner email, to be used for account recovery:
     
     # Set the access to the root storage folder itself
-    acl:accessTo <./musterstrasse1.ttl>;
+    acl:accessTo <./>;
     # All resources will inherit this authorization, by default
     acl:default <./>;
     # The owner has all of the access modes allowed
