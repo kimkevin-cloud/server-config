@@ -1,0 +1,26 @@
+# Uni Pod — MailBox & verification
+
+This folder contains the MailBox for the university pod and example files.
+
+RDF format for MailBox entries: use `owl:sameAs` to link the mailbox entry to the student's WebID.
+
+Files:
+- `MailBox/.acl` — grants Read/Write to `http://localhost:3000/kielcloak/profile/card#me` and owner control to the uni.
+- `MailBox/inbox.ttl` — example entry using `owl:sameAs`.
+
+How to verify (curl / Git Bash):
+
+```bash
+BASE='https://solid.valetudo.casa'
+TOKEN='<OWNER_TOKEN>'
+
+# List mailbox
+curl -I "$BASE/uni/MailBox/"
+
+# GET example (as owner)
+curl -H "Authorization: Bearer $TOKEN" "$BASE/uni/MailBox/inbox.ttl"
+
+# Negative test: other user should be denied
+OTHER='<OTHER_TOKEN>'
+curl -s -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $OTHER" "$BASE/uni/MailBox/inbox.ttl"
+```
