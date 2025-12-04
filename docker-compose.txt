@@ -1,0 +1,13 @@
+services:  
+  solid:
+    container_name: solid
+    image: solidproject/community-server:latest
+    volumes:
+      # Persistente Daten für die Pods
+      - ./solid-data:/data
+    command: >
+      -c config/file.json
+      -f /data
+      -l info
+    ports:
+      - 3000:3000
